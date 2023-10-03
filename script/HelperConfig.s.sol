@@ -10,6 +10,9 @@ contract HelperConfig is Script {
         address priceFeed; // ETH/USD pricefeed address
     }
 
+    uint8 public constant DECIMALS = 8;
+    int256 public constant INITIAL_PRICE = 2000e8;
+
     NetworkConfig public activeNetworkConfig;
 
     constructor() {
@@ -32,7 +35,10 @@ contract HelperConfig is Script {
     function getAnvilEthConfig() public returns (NetworkConfig memory) {
         // pricefeed address
         vm.broadcast();
-        MockV3Aggregator mockPriceFeed = new MockV3Aggregator(8, 2000e8);
+        MockV3Aggregator mockPriceFeed = new MockV3Aggregator(
+            DECIMALS,
+            INITIAL_PRICE
+        );
         vm.stopBroadcast();
 
         NetworkConfig memory anvilConfig = NetworkConfig({
