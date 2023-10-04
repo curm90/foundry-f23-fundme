@@ -13,6 +13,12 @@ contract FundMeTest is Test {
     uint256 constant SEND_VALUE = 0.1 ether;
     uint256 constant STARTING_BALANCE = 10 ether;
 
+    modifier funded() {
+        vm.prank(USER);
+        fundMe.fund{value: SEND_VALUE}();
+        _;
+    }
+
     function setUp() external {
         DeployFundMe deployFundMe = new DeployFundMe();
         fundMe = deployFundMe.run();
@@ -37,17 +43,19 @@ contract FundMeTest is Test {
         fundMe.fund();
     }
 
-    function testFundUpdatesFundedDataStructure() public {
-        vm.prank(USER); // Next tx will be sent by USER
-        fundMe.fund{value: SEND_VALUE}();
+    function testFundUpdatesFundedDataStructure() public funded {
         uint256 amountFunded = fundMe.getAddressToAmountFunded(USER);
         assertEq(amountFunded, SEND_VALUE);
     }
 
-    function testAddsFunderToFundersArray() public {
-        vm.prank(USER);
-        fundMe.fund{value: SEND_VALUE}();
+    function testAddsFunderToFundersArray() public funded {
         address funder = fundMe.getFunder(0);
         assertEq(funder, USER);
+    }
+
+    function testOnlyOwnerCanWithdraw() public funded {
+        vm.expectRevert(); // expects next line to rever except when next line is vm.something (cheatcode)
+        vm.prank(USER);
+        fundMe.withdraw();
     }
 }
