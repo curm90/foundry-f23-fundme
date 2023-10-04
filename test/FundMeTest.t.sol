@@ -10,6 +10,7 @@ contract FundMeTest is Test {
     FundMe fundMe;
 
     address USER = makeAddr("user");
+    uint256 constant SEND_VALUE = 0.1 ether;
 
     function setUp() external {
         DeployFundMe deployFundMe = new DeployFundMe();
@@ -36,8 +37,8 @@ contract FundMeTest is Test {
 
     function testFundUpdatesFundedDataStructure() public {
         vm.prank(USER); // Next tx will be sent by USER
-        fundMe.fund{value: 10e18}();
+        fundMe.fund{value: SEND_VALUE}();
         uint256 amountFunded = fundMe.getAddressToAmountFunded(USER);
-        assertEq(amountFunded, 10e18);
+        assertEq(amountFunded, SEND_VALUE);
     }
 }
