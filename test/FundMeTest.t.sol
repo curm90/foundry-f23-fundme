@@ -11,10 +11,12 @@ contract FundMeTest is Test {
 
     address USER = makeAddr("user");
     uint256 constant SEND_VALUE = 0.1 ether;
+    uint256 constant STARTING_BALANCE = 10 ether;
 
     function setUp() external {
         DeployFundMe deployFundMe = new DeployFundMe();
         fundMe = deployFundMe.run();
+        vm.deal(USER, STARTING_BALANCE);
     }
 
     function testMinimumDollarIsFive() public {
