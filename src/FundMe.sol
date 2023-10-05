@@ -9,8 +9,8 @@ error FundMe__NotOwner();
 contract FundMe {
     using PriceConverter for uint256;
 
-    mapping(address => uint256) private addressToAmountFunded;
-    address[] private funders;
+    mapping(address => uint256) private s_addressToAmountFunded;
+    address[] private s_funders;
 
     // Could we make this constant?  /* hint: no! We should make it immutable! */
     address private immutable i_owner;
@@ -28,8 +28,8 @@ contract FundMe {
             "You need to spend more ETH!"
         );
         // require(PriceConverter.getConversionRate(msg.value) >= MINIMUM_USD, "You need to spend more ETH!");
-        addressToAmountFunded[msg.sender] += msg.value;
-        funders.push(msg.sender);
+        s_addressToAmountFunded[msg.sender] += msg.value;
+        s_funders.push(msg.sender);
     }
 
     function getVersion() public view returns (uint256) {
@@ -43,17 +43,17 @@ contract FundMe {
     }
 
     function cheaperWithdraw() public onlyOwner {
-        uint256 fundersLength = funders.length;
+        uint256 fundersLength = s_funders.length;
         for (
             uint256 funderIndex = 0;
             funderIndex < fundersLength;
             funderIndex++
         ) {
-            address funder = funders[funderIndex];
-            addressToAmountFunded[funder] = 0;
+            address funder = s_funders[funderIndex];
+            s_addressToAmountFunded[funder] = 0;
         }
 
-        funders = new address[](0);
+        s_funders = new address[](0);
         (bool callSuccess, ) = payable(msg.sender).call{
             value: address(this).balance
         }("");
@@ -63,13 +63,13 @@ contract FundMe {
     function withdraw() public onlyOwner {
         for (
             uint256 funderIndex = 0;
-            funderIndex < funders.length;
+            funderIndex < s_funders.length;
             funderIndex++
         ) {
-            address funder = funders[funderIndex];
-            addressToAmountFunded[funder] = 0;
+            address funder = s_funders[funderIndex];
+            s_addressToAmountFunded[funder] = 0;
         }
-        funders = new address[](0);
+        s_funders = new address[](0);
         // // transfer
         // payable(msg.sender).transfer(address(this).balance);
 
@@ -107,11 +107,11 @@ contract FundMe {
     function getAddressToAmountFunded(
         address fundingAddress
     ) external view returns (uint256) {
-        return addressToAmountFunded[fundingAddress];
+        return s_addressToAmountFunded[fundingAddress];
     }
 
     function getFunder(uint256 index) external view returns (address) {
-        return funders[index];
+        return s_funders[index];
     }
 
     function getOwner() external view returns (address) {
